@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InsightX</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0b3d91">
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#ffffff;
+font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1f1f1d}
+.card{max-width:420px;padding:28px 20px;text-align:center}
+img{width:220px;max-width:70vw;height:auto}
+p{color:#52514e;margin:10px 0 22px}
+.btn{display:block;width:100%;box-sizing:border-box;padding:14px 18px;margin:10px 0;border-radius:12px;
+font-size:17px;font-weight:600;text-decoration:none;border:0;cursor:pointer}
+.primary{background:#0b3d91;color:#fff} .secondary{background:#eef3fb;color:#0b3d91}
+.hint{font-size:14px;color:#7a7974;margin-top:16px}
+</style></head><body><div class="card">
+<img src="logo.png" alt="InsightX">
+<p>Your InsightX dashboard — sign in with the email you were invited with.</p>
+<button id="install" class="btn primary" hidden>Install InsightX</button>
+<a id="open" class="btn secondary" href="https://dbl-insightx.streamlit.app/./">Open InsightX</a>
+<p class="hint" id="hint">To keep it on your phone: tap <b>⋮</b> → <b>Install app</b> (or <b>Add to Home screen</b>).</p>
+</div>
+<script>
+const APP = "https://dbl-insightx.streamlit.app/./";
+if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) { location.replace(APP); }
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js"); }
+let ask = null; const btn = document.getElementById("install");
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; btn.hidden = false; });
+btn.addEventListener("click", async () => { if (!ask) return; ask.prompt(); await ask.userChoice; ask = null; btn.hidden = true; });
+window.addEventListener("appinstalled", () => { document.getElementById("hint").textContent = "Installed — open InsightX from your home screen."; });
+</script></body></html>
