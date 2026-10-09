@@ -1,6 +1,21 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>InsightX</title>
+<meta name="description" content="Tap to open InsightX, or install it on your phone.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="InsightX">
+<meta property="og:title" content="InsightX">
+<meta property="og:description" content="Tap to open InsightX, or install it on your phone.">
+<meta property="og:url" content="https://sorforaj-dbl.github.io/insightx/">
+<meta property="og:image" content="https://sorforaj-dbl.github.io/insightx/preview.jpg">
+<meta property="og:image:secure_url" content="https://sorforaj-dbl.github.io/insightx/preview.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="InsightX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="InsightX">
+<meta name="twitter:image" content="https://sorforaj-dbl.github.io/insightx/preview.jpg">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#0b3d91">
@@ -14,16 +29,37 @@ p{color:#52514e;margin:10px 0 22px}
 font-size:17px;font-weight:600;text-decoration:none;border:0;cursor:pointer}
 .primary{background:#0b3d91;color:#fff} .secondary{background:#eef3fb;color:#0b3d91}
 .hint{font-size:14px;color:#7a7974;margin-top:16px}
+.note{font-size:15px;border-radius:10px;padding:10px 12px;margin:0 0 14px;background:#e9f6ee;color:#14532d}
+.note.warn{background:#fdecea;color:#7f1d1d}
 </style></head><body><div class="card">
 <img src="logo.png" alt="InsightX">
 <p>Your InsightX dashboard — sign in with the email you were invited with.</p>
+<div id="note" class="note" hidden></div>
 <button id="install" class="btn primary" hidden>Install InsightX</button>
-<a id="open" class="btn secondary" href="https://dbl-insightx.streamlit.app/./">Open InsightX</a>
+<a id="open" class="btn secondary" href="https://dbl-insightx.streamlit.app/">Open InsightX</a>
 <p class="hint" id="hint">To keep it on your phone: tap <b>⋮</b> → <b>Install app</b> (or <b>Add to Home screen</b>).</p>
 </div>
 <script>
-const APP = "https://dbl-insightx.streamlit.app/./";
-if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) { location.replace(APP); }
+const APP = "https://dbl-insightx.streamlit.app/";
+const SLOT = "insightx_owner";
+function box() { try { return window.localStorage; } catch (e) { return null; } }
+let saved = null;
+const m = location.hash.match(/^#owner=(.*)$/);
+if (m) {
+  const v = decodeURIComponent(m[1] || "").trim(), s = box();
+  history.replaceState(null, "", location.pathname + location.search);   // the key never stays in the address bar
+  if (!s) { saved = "fail"; }
+  else if (v && v !== "off") { try { s.setItem(SLOT, v); saved = "on"; } catch (e) { saved = "fail"; } }
+  else { s.removeItem(SLOT); saved = "off"; }
+}
+let key = null; try { key = box() && box().getItem(SLOT); } catch (e) {}
+const TARGET = key ? APP + "?owner=" + encodeURIComponent(key) : APP;
+if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) { location.replace(TARGET); }
+document.getElementById("open").href = TARGET;
+const note = document.getElementById("note");
+if (saved === "on") { note.textContent = "✅ Your full view is set on this phone. Now install InsightX (if it is already installed, just open it)."; note.hidden = false; }
+else if (saved === "off") { note.textContent = "Full view removed from this phone — InsightX here now opens the shared view."; note.hidden = false; }
+else if (saved === "fail") { note.textContent = "Couldn't save on this phone. Open this link in normal Chrome (not Incognito) and try again."; note.className = "note warn"; note.hidden = false; }
 if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js"); }
 let ask = null; const btn = document.getElementById("install");
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; btn.hidden = false; });
